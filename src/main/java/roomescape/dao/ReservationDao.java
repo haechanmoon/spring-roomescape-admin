@@ -39,8 +39,8 @@ public class ReservationDao {
 
             Long timeId = resultSet.getLong("time_id");
             String timeValue = resultSet.getString("time_value");
-            ReservationTime time = new ReservationTime(timeId, timeValue);
-            return new Reservation(id, name, date, time);
+            ReservationTime time = new ReservationTime(timeId, java.time.LocalTime.parse(timeValue));
+            return new Reservation(id, name, java.time.LocalDate.parse(date), time);
         });
     }
 
@@ -51,7 +51,7 @@ public class ReservationDao {
             PreparedStatement preparedStatement = connection.prepareStatement(sql, new String[]{"id"});
 
             preparedStatement.setString(1, reservation.getName());
-            preparedStatement.setString(2, reservation.getDate());
+            preparedStatement.setString(2, reservation.getDate().toString());
             preparedStatement.setLong(3, reservation.getTime().getId());
 
             return preparedStatement;
