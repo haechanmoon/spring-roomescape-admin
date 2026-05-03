@@ -1,6 +1,7 @@
 package roomescape.dao;
 
 import java.sql.PreparedStatement;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Objects;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -23,7 +24,7 @@ public class ReservationTimeDao {
         return jdbcTemplate.queryForObject(sql, (resultSet, rowNum) -> {
             return new ReservationTime(
                     resultSet.getLong("id"),
-                    resultSet.getString("start_at")
+                    LocalTime.parse(resultSet.getString("start_at"))
             );
         }, id);
     }
@@ -32,9 +33,9 @@ public class ReservationTimeDao {
         String sql = "SELECT id, start_at FROM reservation_time";
         return jdbcTemplate.query(sql, (resultSet, rowNum)-> {
             long id = resultSet.getLong("id");
-            String startAt = resultSet.getString("start_at");
+            LocalTime startAt = LocalTime.parse(resultSet.getString("start_at"));
 
-            return new ReservationTime(id,startAt);
+            return new ReservationTime(id, startAt);
         });
     }
 
@@ -43,7 +44,7 @@ public class ReservationTimeDao {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection-> {
             PreparedStatement preparedStatement = connection.prepareStatement(sql, new String[]{"id"});
-            preparedStatement.setString(1,reservationTime.getStartAt());
+            preparedStatement.setString(1, reservationTime.getStartAt().toString());
 
             return preparedStatement;
         }, keyHolder);
@@ -56,9 +57,9 @@ public class ReservationTimeDao {
         jdbcTemplate.update(sql, id);
     }
 
-    public boolean existsByStartAt(String startAt) {
+    public boolean existsByStartAt(LocalTime startAt) {
         String sql = "Select count(*) from reservation_time where start_at = ?";
-        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, startAt);
+        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, startAt.toString());
         return count != null && count >0;
     }
 }

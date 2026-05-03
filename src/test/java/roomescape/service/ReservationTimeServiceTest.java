@@ -2,11 +2,14 @@ package roomescape.service;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import roomescape.dao.ReservationDao;
+import roomescape.dao.ReservationTimeDao;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 
@@ -18,16 +21,19 @@ class ReservationTimeServiceTest {
     private ReservationTimeService reservationTimeService;
 
     @Autowired
+    private ReservationTimeDao reservationTimeDao;
+
+    @Autowired
     private ReservationDao reservationDao;
 
     @Test
     void 중복된_시간을_저장하면_예외가_발생한다() {
         // given
-        ReservationTime existTime = new ReservationTime(null, "10:00");
-        reservationTimeService.save(existTime);
+        ReservationTime existTime = new ReservationTime(null, LocalTime.parse("10:00"));
+        reservationTimeDao.save(existTime);
 
-        // when
-        ReservationTime newTime = new ReservationTime(null, "10:00");
+        // when & then
+        ReservationTime newTime = new ReservationTime(null, LocalTime.parse("10:00"));
 
         //then
         assertThatThrownBy(() -> reservationTimeService.save(newTime))
@@ -38,9 +44,9 @@ class ReservationTimeServiceTest {
     @Test
     void 이미_예약시간이_차있으면_삭제할_수_없다(){
         //given
-        ReservationTime existTime = new ReservationTime(null, "10:00");
-        ReservationTime savedTime = reservationTimeService.save(existTime);
-        Reservation reservation = new Reservation(null, "pobi", "2026-05-02", savedTime);
+        ReservationTime existTime = new ReservationTime(null, LocalTime.parse("10:00"));
+        ReservationTime savedTime = reservationTimeDao.save(existTime);
+        Reservation reservation = new Reservation(null, "pobi", LocalDate.parse("2026-05-02"), savedTime);
         reservationDao.save(reservation);
         Long savedId = savedTime.getId();
 
