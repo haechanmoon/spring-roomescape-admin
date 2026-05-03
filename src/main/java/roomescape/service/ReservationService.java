@@ -23,14 +23,22 @@ public class ReservationService {
         return reservationDao.findAll();
     }
 
-    public void delete(Long id){
-        reservationDao.deleteById(id);
-    }
-
     public Reservation save(ReservationRequest reservationRequest) {
         Long timeId = reservationRequest.timeId();
         ReservationTime time = reservationTimeDao.findById(timeId);
         Reservation reservation = new Reservation( reservationRequest.name(), reservationRequest.date(), time);
         return reservationDao.save(reservation);
+    }
+
+    public void delete(Long id){
+        validateHasReservation(id);
+        reservationDao.deleteById(id);
+    }
+
+    private void validateHasReservation(Long id) {
+        boolean hasReservation = reservationDao.existByTimeId(id);
+        if(!hasReservation){
+            throw new IllegalArgumentException("존재하지 않는 예약니다.");
+        }
     }
 }
